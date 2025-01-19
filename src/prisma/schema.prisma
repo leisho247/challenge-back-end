@@ -1,0 +1,59 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                Int                 @id @default(autoincrement())
+  name              String
+  email             String              @unique
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  ProjectAssignment ProjectAssignment[]
+  
+  @@map("user")
+}
+
+model Projects {
+  id                Int                 @id @default(autoincrement())
+  name              String
+  description       String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  ProjectAssignment ProjectAssignment[]
+  ProjectSearch     ProjectSearch[]
+
+  @@map("projects")
+}
+
+model ProjectAssignment {
+  id        Int        @id @default(autoincrement())
+  projectId Int
+  userId    Int
+  role      ProjectRol
+  projects  Projects   @relation(fields: [projectId], references: [id])
+  user      User       @relation(fields: [userId], references: [id])
+
+  @@unique([projectId, userId])
+  @@map("project_assignment")
+}
+
+model ProjectSearch {
+  id         Int      @id @default(autoincrement())
+  projectId  Int
+  searchTerm String
+  createdAt  DateTime @default(now())
+
+  project Projects @relation(fields: [projectId], references: [id])
+
+  @@map("project_search")
+}
+
+enum ProjectRol {
+  ADMIN
+  MEMBER
+}
